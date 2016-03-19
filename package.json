@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/deostroll/ngrule/issues"
   },
-  "homepage": "https://github.com/deostroll/ngrule#readme"
+  "homepage": "https://github.com/deostroll/ngrule#readme",
+  "devDependencies": {
+    "csv2json": "^1.1.0"
+  }
 }
