@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/deostroll/ngrule#readme",
   "devDependencies": {
-    "csv2json": "^1.1.0"
+    "chai": "^3.5.0",
+    "csv2json": "^1.1.0",
+    "mocha": "^2.4.5"
   }
 }

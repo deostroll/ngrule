@@ -33,11 +33,11 @@
     ]
   },
   {
-    "name": "Orders",
+    "name": "Order",
     "fields" : [
       {
         "name": "OrderID",
-        "type": "TEXT"
+        "type": "INT"
       },
       {
         "name": "CustomerID",
