@@ -1,0 +1,60 @@
+{
+	condition:{
+		type: 'BinaryExpression',
+		op: '_AND_',
+		left: {
+      		  type: 'BinaryExpression',
+      			op: '==',
+      			left: {
+      				type: 'PropertyReferenceExpression',
+      				 
+              target: {
+                type: 'Entity',
+                name: 'OrderDetail'
+              },
+              propertyName: 'ProductName'
+      			},
+      			right: {
+      				type: 'PrimitiveReferenceExpression',
+      				value: 'Prod1',
+      				valueType: 'TEXT'
+      			}
+      		}
+      	,
+      	right:{
+          type: 'BinaryExpression',
+          op: '==',
+          left: {
+            type: 'PropertyReferenceExpression',
+            target: {
+              type: 'Entity',
+              name: 'Customer'
+            },
+            propertyName: 'SelectedDiscountOption'
+          },
+          right: {
+            type: 'PrimitiveReferenceExpression',
+            value: '10PCOFF',
+            valueType: 'TEXT'
+          }
+      	}
+	}
+	thenActions: [{
+			 type: 'AssignmentStatement',
+        left: {
+          type: 'PropertyReferenceExpression',
+            // value: 'OrderDetail.ProductName'
+            target: {
+              type: 'Entity',
+              name: 'OrderItem'
+            },
+            propertyName: 'Discount'
+        },
+        right: {
+          type: 'PrimitiveReferenceExpression',
+          value: '10',
+          valueType: 'INT'
+        }
+       }
+	]
+}

@@ -1,0 +1,7 @@
+RULE "Rule1"
+IF
+		OrderDetail.ProductName == 'Prod1'  _AND_ Customer.SelectedDiscountOption == '10PCOFF'
+THEN
+		Order.Discount = 10;
+ENDIF
+ENDRULE
