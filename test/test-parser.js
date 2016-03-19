@@ -22,4 +22,23 @@ describe('parser internal logic', function(){
     });
     // expect(actual).to.equal(expected);
   });
+
+  describe('parsing expression', function(){
+    //TODO: should test if ast is null
+    it('should parse simple property reference expression', function(){
+      //var tokens = ['Order.Discount', '+', '100'];
+      var token = 'Order.Discount';
+      var expectedAst = {
+        type: 'PropertyReferenceExpression',
+        target: {
+          type:'Entity',
+          name: 'Order'
+        },
+        propertyName: 'Discount'
+      };
+      var actualAst = parser._.parseUnitExpression(token);
+      expect(expectedAst).to.deep.equal(actualAst);
+      console.log(expectedAst);
+    });
+  })
 });
