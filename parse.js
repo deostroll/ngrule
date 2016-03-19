@@ -37,14 +37,18 @@ function parseOneRule(oneRule) {
 }
 
 function parseUnitExpression(token) {
-  // console.log(token)
 
   var ast = null;
   if(token[0] === '"') {
     if(token[token.length - 1] !== '"') {
       throw new Error('Invalid string termination')
     }
-
+    //String
+    ast = {
+      type: 'PrimitiveReferenceExpression',
+      value: token.replace(/"/g, ''),
+      valueType: 'TEXT'
+    }
   }
   else {
     if([].slice.call(token).reduce(function(a, ch){
@@ -54,6 +58,7 @@ function parseUnitExpression(token) {
     }
     else {
       //simple property reference
+      // console.log('SimplePropRef:', token);
       ast = {
         type: 'PropertyReferenceExpression',
         target: {
@@ -70,7 +75,7 @@ function parseUnitExpression(token) {
 
 function parseUnitBinaryExpression(tokens){
   var ast = {
-    type: 'BinaryExpression'
+    type: 'BinaryExpression',
     op: null,
     left: null,
     right: null
@@ -83,6 +88,7 @@ function parseUnitBinaryExpression(tokens){
 }
 
 function parseCompoundExpression(tokens) {
+  // console.log('input:',tokens);
   var ast = {
     type: 'BinaryExpression',
     op: null,
@@ -95,12 +101,16 @@ function parseCompoundExpression(tokens) {
   if(idx > -1) {
     ast.op = '_AND_';
     var leftTokens = tokens.slice(0, idx);
-    var rightTokens = tokens.slice(idx + 1);
+    // console.log('tokens:', tokens);
+    // console.log('idx:', idx);
+    // console.log('left:', leftTokens);
+    var rightTokens = tokens.slice(idx+1);
+    // console.log('right:', rightTokens);
     if(leftTokens.length > 3){
       ast.left = parseCompoundExpression(leftTokens);
     }
-    else if(leftTokens.length == 3){
-      ast.left = parseUnitBinaryExpression(leftTokens[0]);
+    else if(leftTokens.length === 3){
+      ast.left = parseUnitBinaryExpression(leftTokens);
     }
     else {
       ast.left = parseUnitExpression(leftTokens[0]);
@@ -118,14 +128,14 @@ function parseCompoundExpression(tokens) {
   }
   else {
     //TODO: handle other arithemetic operators
-    idx = tokens.indexOf('+');
-    ast.op = '+';
+    idx = tokens.indexOf('==');
+    ast.op = '==';
     var leftTokens = tokens.slice(0, idx);
     var rightTokens = tokens.slice(idx + 1);
     if(leftTokens.length > 3) {
       ast.left = parseCompoundExpression(leftTokens);
     }
-    else if (leftTokens.length === 3){
+    else if (leftTokens.length === 3) {
       ast.left = parseUnitBinaryExpression(leftTokens);
     }
     else {
@@ -146,7 +156,7 @@ function parseCompoundExpression(tokens) {
   return ast;
 }
 
-function
+
 
 function normalizeRuleText(ruleText) {
   return ruleText
@@ -165,6 +175,7 @@ module.exports = {
   _ : {
     normalizeRuleText: normalizeRuleText,
     readRuleFile: readRuleFile,
-    parseUnitExpression: parseUnitExpression
+    parseUnitExpression: parseUnitExpression,
+    parseCompoundExpression: parseCompoundExpression
   }
 }
