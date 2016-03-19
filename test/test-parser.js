@@ -41,6 +41,31 @@ describe('parser internal logic', function(){
       // console.log(expectedAst);
     });
 
+    it('should parse a statement',function(){
+      var exp = "OrderItem.Discount = 10;"
+      var actual = parser._.parseStatement(exp);
+      var expected = {
+        type: 'statement',
+        left: {
+          type: 'PropertyReferenceExpression',
+            // value: 'OrderDetail.ProductName'
+            target: {
+              type: 'Entity',
+              name: 'OrderItem'
+            },
+            propertyName: 'Discount'
+        },
+        right: {
+          type: 'PrimitiveReferenceExpression',
+          value: 10,
+          valueType: 'INT'
+        }
+
+      };
+      expect(expected).to.deep.equal(actual);
+
+    });
+
     it('should parse a Compound Binary Expression', function(){
       var exp = "OrderDetail.ProductName == \"Prod1\" _AND_ OrderDetail.ProductName == \"Prod2\"".split(' ');
       var actual = parser._.parseCompoundExpression(exp);
