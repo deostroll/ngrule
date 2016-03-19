@@ -1,6 +1,6 @@
 // parse.js
 var fs = require('fs');
-
+var assert = require('assert');
 // get rule file contents
 function readRuleFile(file) {
   return fs.readFileSync(file, 'utf8');
@@ -31,14 +31,29 @@ function parseRuleText(ruleText) {
 }
 
 function parseOneRule(oneRule) {
+  var ast = {
+    condition:null,
+    thenStatements: [],
+    name: null
+  };
   if(oneRule.indexOf('RULE') !== -1) {
     throw new Error('Invalid rule defition - no ENDRULE found:' + oneRule[1]);
   }
+
+  var ruleName = oneRule[1].replace(/"/g, '');
+  ast.name = ruleName;
+
+  if(oneRule[2] !== 'IF') {
+    throw new Error('No IF statement found');
+  }
+
+  
 }
 
 function parseUnitExpression(token) {
 
   var ast = null;
+  var rgx_number = /(\d+|(\d+\.\d+))/g;
   if(token[0] === '"') {
     if(token[token.length - 1] !== '"') {
       throw new Error('Invalid string termination')
@@ -48,6 +63,13 @@ function parseUnitExpression(token) {
       type: 'PrimitiveReferenceExpression',
       value: token.replace(/"/g, ''),
       valueType: 'TEXT'
+    }
+  }
+  else if(rgx_number.test(token)){
+    ast = {
+      type: 'PrimitiveReferenceExpression',
+      value: token+'',
+      valueType: token.indexOf('.') > -1 ? 'FLOAT' : 'INT'
     }
   }
   else {
@@ -156,7 +178,33 @@ function parseCompoundExpression(tokens) {
   return ast;
 }
 
+function parseStatement(tokens) {
+    var idxOfEquals = tokens.indexOf('=');
+    var leftTokens = tokens.slice(0, idxOfEquals)
+    assert(leftTokens.length == 1, 'left should always be one token');
+    leftTokens
+    var ast =
+      {
+        type: 'AssignmentStatement',
+        left: null,
+        right: null,
+      };
 
+    ast.left = parseUnitExpression(leftTokens[0]);
+    var rightTokens = tokens.slice(idxOfEquals + 1);
+    // console.log(rightTokens);
+    if(rightTokens.length > 3) {
+      ast.right = parseCompoundExpression(rightTokens);
+    }
+    else if (rightTokens.length === 3) {
+      ast.right = parseUnitBinaryExpression(rightTokens);
+    }
+    else {
+      assert(rightTokens.length === 1, 'invalid length for unit expression');
+      ast.right = parseUnitExpression(rightTokens[0]);
+    }
+    return ast;
+}
 
 function normalizeRuleText(ruleText) {
   return ruleText
@@ -176,6 +224,7 @@ module.exports = {
     normalizeRuleText: normalizeRuleText,
     readRuleFile: readRuleFile,
     parseUnitExpression: parseUnitExpression,
-    parseCompoundExpression: parseCompoundExpression
+    parseCompoundExpression: parseCompoundExpression,
+    parseStatement: parseStatement
   }
 }

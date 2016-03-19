@@ -42,10 +42,10 @@ describe('parser internal logic', function(){
     });
 
     it('should parse a statement',function(){
-      var exp = "OrderItem.Discount = 10;"
+      var exp = "OrderItem.Discount = 10".split(' ');
       var actual = parser._.parseStatement(exp);
       var expected = {
-        type: 'statement',
+        type: 'AssignmentStatement',
         left: {
           type: 'PropertyReferenceExpression',
             // value: 'OrderDetail.ProductName'
@@ -57,7 +57,7 @@ describe('parser internal logic', function(){
         },
         right: {
           type: 'PrimitiveReferenceExpression',
-          value: 10,
+          value: '10',
           valueType: 'INT'
         }
 
