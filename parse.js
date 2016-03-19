@@ -46,8 +46,32 @@ function parseOneRule(oneRule) {
   if(oneRule[2] !== 'IF') {
     throw new Error('No IF statement found');
   }
+  var indexOfThen = oneRule.indexOf('THEN');
+  var ifExpressionTokens = oneRule.slice(3, indexOfThen);
+  if(ifExpressionTokens.length > 3) {
+    ast.condition = parseCompoundExpression(ifExpressionTokens);
+  }
+  else if(ifExpressionTokens.length === 3) {
+    ast.condition = parseUnitBinaryExpression(ifExpressionTokens);
+  }
+  else {
+    ast.condition = parseUnitExpression(ifExpressionTokens[0]);
+  }
+  var statementCount = oneRule.slice.(indexOfThen).reduce(function(a, tkn){
+    return a + tkn == ';'? 1 : 0;
+  });
 
-  
+  if (statmentCount > 1) {
+    //TODO: parse multiple statements
+  }
+  else {
+    //parse only the one statement
+    var indexOfSemiColon = oneRule.indexOf(';');
+    var statementTokens = oneRule.slice(indexOfThen, indexOfSemiColon - indexOfThen);
+    assert(statementTokens.indexOf(';') === -1, 'should not contain semicolon');
+    ast.thenStatements.push(parseStatement(statementTokens));
+  }
+  return ast;
 }
 
 function parseUnitExpression(token) {
