@@ -25,69 +25,71 @@ describe('parser internal logic', function(){
 
   describe('parsing one whole rule',function(){
     it('should parse whole rule',function(){
-      var exp = fs.readFileSync('test/rule2.txt', 'utf8');
+      // var exp = fs.readFileSync('test/rule2.txt', 'utf8');
       var expected = {
-  condition:{
-    type: 'BinaryExpression',
-    op: '_AND_',
-    left: {
-            type: 'BinaryExpression',
-            op: '==',
-            left: {
-              type: 'PropertyReferenceExpression',
-               
-              target: {
-                type: 'Entity',
-                name: 'OrderDetail'
-              },
-              propertyName: 'ProductName'
-            },
-            right: {
-              type: 'PrimitiveReferenceExpression',
-              value: 'Prod1',
-              valueType: 'TEXT'
-            }
-          }
-        ,
-        right:{
+        condition:{
           type: 'BinaryExpression',
-          op: '==',
+          op: '_AND_',
           left: {
-            type: 'PropertyReferenceExpression',
-            target: {
-              type: 'Entity',
-              name: 'Customer'
-            },
-            propertyName: 'SelectedDiscountOption'
-          },
-          right: {
-            type: 'PrimitiveReferenceExpression',
-            value: '10PCOFF',
-            valueType: 'TEXT'
-          }
-        }
-  },
-  thenActions: [{
-       type: 'AssignmentStatement',
-        left: {
-          type: 'PropertyReferenceExpression',
-            // value: 'OrderDetail.ProductName'
-            target: {
-              type: 'Entity',
-              name: 'OrderItem'
-            },
-            propertyName: 'Discount'
+                  type: 'BinaryExpression',
+                  op: '==',
+                  left: {
+                    type: 'PropertyReferenceExpression',
+
+                    target: {
+                      type: 'Entity',
+                      name: 'OrderDetail'
+                    },
+                    propertyName: 'ProductName'
+                  },
+                  right: {
+                    type: 'PrimitiveReferenceExpression',
+                    value: 'Prod1',
+                    valueType: 'TEXT'
+                  }
+                }
+              ,
+              right:{
+                type: 'BinaryExpression',
+                op: '==',
+                left: {
+                  type: 'PropertyReferenceExpression',
+                  target: {
+                    type: 'Entity',
+                    name: 'Customer'
+                  },
+                  propertyName: 'SelectedDiscountOption'
+                },
+                right: {
+                  type: 'PrimitiveReferenceExpression',
+                  value: '10PCOFF',
+                  valueType: 'TEXT'
+                }
+              }
         },
-        right: {
-          type: 'PrimitiveReferenceExpression',
-          value: '10',
-          valueType: 'INT'
-        }
-       }
-  ]
-}};
-      var fileActual = parser._.readRuleFile(exp);
-      var actual = parser._.functionName(fileActual);
+        thenStatements: [{
+             type: 'AssignmentStatement',
+              left: {
+                type: 'PropertyReferenceExpression',
+                  // value: 'OrderDetail.ProductName'
+                  target: {
+                    type: 'Entity',
+                    name: 'Order'
+                  },
+                  propertyName: 'Discount'
+              },
+              right: {
+                type: 'PrimitiveReferenceExpression',
+                value: '10',
+                valueType: 'INT'
+              }
+             }
+        ],
+        name: 'Rule1'
+      };
+      var fileActual = parser._.normalizeRuleText(parser._.readRuleFile('test/rule2.txt')).split( ' ');
+      // console.log(fileActual)
+      var actual = parser._.parseOneRule(fileActual);
       expect(expected).to.deep.equal(actual);
     });
   });

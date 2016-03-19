@@ -36,7 +36,7 @@ function parseOneRule(oneRule) {
     thenStatements: [],
     name: null
   };
-  if(oneRule.indexOf('RULE') !== -1) {
+  if(oneRule.indexOf('RULE',1) !== -1) {
     throw new Error('Invalid rule defition - no ENDRULE found:' + oneRule[1]);
   }
 
@@ -57,17 +57,17 @@ function parseOneRule(oneRule) {
   else {
     ast.condition = parseUnitExpression(ifExpressionTokens[0]);
   }
-  var statementCount = oneRule.slice.(indexOfThen).reduce(function(a, tkn){
+  var statementCount = oneRule.slice(indexOfThen).reduce(function(a, tkn){
     return a + tkn == ';'? 1 : 0;
   });
 
-  if (statmentCount > 1) {
+  if (statementCount > 1) {
     //TODO: parse multiple statements
   }
   else {
     //parse only the one statement
     var indexOfSemiColon = oneRule.indexOf(';');
-    var statementTokens = oneRule.slice(indexOfThen, indexOfSemiColon - indexOfThen);
+    var statementTokens = oneRule.slice(indexOfThen +1, indexOfSemiColon);
     assert(statementTokens.indexOf(';') === -1, 'should not contain semicolon');
     ast.thenStatements.push(parseStatement(statementTokens));
   }
@@ -75,9 +75,9 @@ function parseOneRule(oneRule) {
 }
 
 function parseUnitExpression(token) {
-
+  // console.log('ue:', token);
   var ast = null;
-  var rgx_number = /(\d+|(\d+\.\d+))/g;
+  var rgx_number = /^(\d+|(\d+\.\d+))$/g;
   if(token[0] === '"') {
     if(token[token.length - 1] !== '"') {
       throw new Error('Invalid string termination')
@@ -205,7 +205,8 @@ function parseCompoundExpression(tokens) {
 function parseStatement(tokens) {
     var idxOfEquals = tokens.indexOf('=');
     var leftTokens = tokens.slice(0, idxOfEquals)
-    assert(leftTokens.length == 1, 'left should always be one token');
+    //console.log('statements:',tokens)
+    // assert(leftTokens.length === 1, 'left should always be one token');
     leftTokens
     var ast =
       {
@@ -224,7 +225,8 @@ function parseStatement(tokens) {
       ast.right = parseUnitBinaryExpression(rightTokens);
     }
     else {
-      assert(rightTokens.length === 1, 'invalid length for unit expression');
+      // assert(rightTokens.length !== 1, 'invalid length for unit expression');
+      // console.log('rt:',rightTokens);
       ast.right = parseUnitExpression(rightTokens[0]);
     }
     return ast;
