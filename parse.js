@@ -249,6 +249,7 @@ module.exports = {
     readRuleFile: readRuleFile,
     parseUnitExpression: parseUnitExpression,
     parseCompoundExpression: parseCompoundExpression,
-    parseStatement: parseStatement
+    parseStatement: parseStatement,
+    parseOneRule: parseOneRule
   }
 }
