@@ -1,0 +1,12 @@
+RULE "rule1"
+  IF
+    (OrderDetail.ProductName == 'Prod1' _OR_ OrderDetail.ProductName == 'Prod2')
+  THEN
+    IF (Customer.SelectedDiscountOption == '10PCOFF')
+    THEN
+      Order.Discount = 10;
+    ELSE
+      Customer.RewardsPoints = Customer.RewardsPoints + 1000;
+    ENDIF
+  ENDIF
+ENDRULE
