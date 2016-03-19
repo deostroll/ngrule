@@ -23,6 +23,17 @@ describe('parser internal logic', function(){
     // expect(actual).to.equal(expected);
   });
 
+  describe('parsing one whole rule',function(){
+    it('should parse whole rule',function(){
+      var exp = fs.readFileSync('test/rule2.txt', 'utf8');
+      var expected = fs.readFileSync('test/rule2expected.txt', 'utf8');
+      var fileActual = parser._.readRuleFile(exp);
+      var actual = parser._.functionName(fileActual);
+      expect(expected).to.deep.equal(actual);
+    });
+  });
+
+
   describe('parsing expression', function(){
     //TODO: should test if ast is null
     it('should parse simple property reference expression (Unit expression)', function(){
