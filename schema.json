@@ -1,0 +1,90 @@
+[
+  {
+    "name":"Customer",
+    "fields":[
+      {
+        "name":"CustomerID",
+        "type":"TEXT"
+      },
+      {
+        "name": "CompanyName",
+        "type": "TEXT"
+      },
+      {
+        "name": "City",
+        "type": "TEXT"
+      },
+      {
+        "name": "Region",
+        "type": "TEXT"
+      },
+      {
+        "name" : "PostalCode",
+        "type": "TEXT"
+      },
+      {
+        "name":"Country",
+        "type": "TEXT"
+      },
+      {
+        "name":"Orders",
+        "type": "ARRAY[Order]"
+      }
+    ]
+  },
+  {
+    "name": "Orders",
+    "fields" : [
+      {
+        "name": "OrderID",
+        "type": "TEXT"
+      },
+      {
+        "name": "CustomerID",
+        "type": "TEXT"
+      },
+      {
+        "name": "OrderDate",
+        "type": "DATE"
+      },
+      {
+        "name": "Freight",
+        "type" : "FLOAT"
+      },
+      {
+        "name" : "OrderAmount",
+        "type" : "FLOAT"
+      },
+      {
+        "name" : "Discount",
+        "type" : "INT"
+      },
+      {
+        "name" : "OrderDetails",
+        "type" : "ARRAY[OrderDetail]"
+      }
+    ]
+  },
+  {
+    "name" : "OrderDetail",
+    "fields" : [
+      {
+        "name" : "ProductName",
+        "type" : "TEXT"
+      },
+      {
+        "name" : "UnitPrice",
+        "type" : "TEXT"
+      },
+      {
+        "name" : "Quantity",
+        "type" : "FLOAT"
+      },
+      {
+
+      }
+    ]
+  }
+
+
+]
