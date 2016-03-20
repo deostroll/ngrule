@@ -14,7 +14,7 @@ function parseRuleText(ruleText) {
     if(token == 'RULE') {
       var oneRule = [];
       var hasEnded = false;
-      i++; //skip to next token
+      //i++; //skip to next token
       do {
         token = tokens[i];
         // hasEnd = (token === 'ENDRULE');
@@ -26,8 +26,11 @@ function parseRuleText(ruleText) {
       if(token !== 'ENDRULE'){
         throw new Error('Invalid rule defition - no ENDRULE found:' + oneRule[1]);
       }
+      ruleAst.push(parseOneRule(oneRule));
+      oneRule = [];
     }
   }
+  return ruleAst;
 }
 
 function parseOneRule(oneRule) {
@@ -42,7 +45,7 @@ function parseOneRule(oneRule) {
 
   var ruleName = oneRule[1].replace(/"/g, '');
   ast.name = ruleName;
-
+  // console.log(oneRule.slice(0,4))
   if(oneRule[2] !== 'IF') {
     throw new Error('No IF statement found');
   }
@@ -244,6 +247,120 @@ function normalizeRuleText(ruleText) {
     .replace(/\s$/, '')
     .replace(/^\s/, '')
 }
+function generateCode(astArray){
+    var code = '';
+    astArray.forEach(function(ast){
+      code += codeFromAst(ast) + '\r\n\r\n';
+    });
+    return code;
+}
+
+function codeFromAst(ast) {
+  var recurse = function(node){
+    var result = null;
+    switch(node.type) {
+      case 'BinaryExpression':
+        var op = node.op == '_AND_' ? '&&' : '||';
+        var left = recurse(node.left);
+        var right = recurse(node.right);
+        result = '(' + left + ' ' + op + ' ' + right + ')'
+        break;
+      case 'PrimitiveReferenceExpression':
+        result = node.valueType == 'TEXT' ? ('"' + node.value + '"'): node.value;
+        break;
+      case 'PropertyReferenceExpression':
+        result = node.target.name + '.' + node.propertyName;
+        break;
+      case 'AssignmentStatement':
+        var left = recurse(node.left);
+        var right = recurse(node.right);
+        result = left + ' = ' + right;
+        break;
+    }
+    return result;
+  };
+
+  var condition = recurse(ast.condition);
+  var statements = ast.thenStatements.map(recurse);
+  return 'if(' + condition + '){\r\n'
+    + statements.map(function(st) { return '\t' + st; }).join(';\r\n')
+    + ';\r\n}';
+}
+
+function makeEngine(schema, code) {
+  var participantEntities = schema.filter(function(entity){
+    return entity.fields.filter(function(field){
+      return field.type.indexOf('ARRAY') === 0;
+    }).length == 1;
+  });
+
+  var ast = {
+    type: 'MethodInvokeExpression',
+    target: 'data',
+    method: 'forEach',
+    args:[]
+  };
+
+  var heirarchy = ['Customer', 'Order', 'OrderDetail'];
+  var funcObj = null;
+
+  for(var i = heirarchy.length - 1; i > -1; i--) {
+    var entity = heirarchy[i];
+    if(i === heirarchy.length - 1) {
+      funcObj = {
+        type: 'FunctionExpression',
+        args:[
+        {type: 'VariableReference',
+        name: entity}
+        ],
+        statements: [
+          {
+            type: 'MethodInvokeExpression',
+            target: 'rules',
+            methodName: 'execute',
+            args: heirarchy.map(function(h){return {type:'VariableReference', name: h}})
+          }
+        ]
+      }
+    }
+    funcObj = {
+      type: 'FunctionExpression',
+      args:[
+        {type: 'VariableReference',
+        name: entity}
+      ],
+      statements: [
+        {
+          type: 'MethodInvokeExpression',
+          target: {
+            type: 'PropertyReferenceExpression',
+            name: entity + 's'
+          },
+          methodName: 'forEach',
+          args: [funcObj]
+        }
+      ]
+    };
+  }
+
+  ast.args = [funcObj];
+
+  heirarchy.push(code);
+  var rules = {};
+  rules.execute = Function.apply({}, heirarchy);
+
+  //generate code
+
+  return [function (data, rules) {
+    data.forEach(function(Customer){
+      Customer.Orders.forEach(function(Order){
+        Order.OrderDetails.forEach(function(OrderDetail){
+          rules.execute(Customer, Order, OrderDetail);
+        });
+      });
+    });
+  }, rules];
+}
 
 module.exports = {
   _ : {
@@ -252,6 +369,14 @@ module.exports = {
     parseUnitExpression: parseUnitExpression,
     parseCompoundExpression: parseCompoundExpression,
     parseStatement: parseStatement,
-    parseOneRule: parseOneRule
-  }
-}
+    parseOneRule: parseOneRule,
+    parseRuleText: parseRuleText
+  },
+  makeRulesAst: function(rulesFile, schema) {
+    var a1 = readRuleFile(rulesFile);
+    var a2 = normalizeRuleText(a1);
+    return parseRuleText(a2);
+  },
+  generateCode: generateCode,
+  makeEngine: makeEngine
+};
